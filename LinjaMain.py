@@ -8,13 +8,11 @@ SQ_SIZE = WIDTH//DIMENSION
 MAX_FPS = 15
 IMAGES = {}
 
-
 def loadImages():
     pieces = ['b', 'r']
     for piece in pieces:
         IMAGES[piece] = p.transform.scale(p.image.load(
             "images/"+piece+".png"), (60, 60))
-
 
 def main():
     p.init()
@@ -80,7 +78,6 @@ def drawBoard(screen):
         for c in range(DIMENSION):
             p.draw.rect(screen, p.Color("white"), p.Rect(
                 c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE),1,5)
-
 
 def drawPieces(screen, board):
     

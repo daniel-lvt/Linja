@@ -1,15 +1,8 @@
+import LinjaBoard
+
 class GameState():
     def __init__(self):
-        self.board = [
-            ["--", "b", "b", "b", "b", "b", "b", "--"],
-            ["r", "--", "--", "--", "--", "--", "--", "b"],
-            ["r", "--", "--", "--", "--", "--", "--", "b"],
-            ["r", "--", "--", "--", "--", "--", "--", "b"],
-            ["r", "--", "--", "--", "--", "--", "--", "b"],
-            ["r", "--", "--", "--", "--", "--", "--", "b"],
-            ["r", "--", "--", "--", "--", "--", "--", "b"],
-            ["--", "r", "r", "r", "r", "r", "r", "--"]
-        ]
+        self.board = LinjaBoard.board_m1r
         self.whiteToMove = True
         self.moveLog = []
         self.stackB = 0
@@ -18,6 +11,8 @@ class GameState():
         self.turnR = True
         self.stackColum = []
 
+
+    #recibe el movimiento de inicio y final de columna 
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = "--"
         self.board[move.endRow][move.endCol] = move.pieceMoved
@@ -43,6 +38,7 @@ class GameState():
             self.stackR += 1
             self.stackColum.append(([move.endRow], [move.endCol]))
 
+    # deshase el movimiento 
     def undoMove(self):
         if len(self.moveLog) != 0:
             move = self.moveLog.pop()
@@ -50,9 +46,11 @@ class GameState():
             self.board[move.endRow][move.endCol] = move.pieceCaptured
             self.whiteToMove = not self.whiteToMove
 
+    # retorna todos los movimientos validos
     def getValidMoves(self):
         return self.getAllPossibleMoves()
 
+    # retorna todos los posibles movimientos
     def getAllPossibleMoves(self):
         moves = []
         for r in range(len(self.board)):
@@ -60,6 +58,7 @@ class GameState():
                 turn = self.board[r][c][0]
                 if(turn == 'r' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
                     self.getMoves(r, c, moves, turn)
+        #valida el turno del movimiento 
         if self.turnB:
             self.turnB = False
         elif not self.whiteToMove:
@@ -67,6 +66,9 @@ class GameState():
                 self.turnR = False
         return moves
 
+
+    # definicion de turno
+    # ---- cudrar movimiento extra solo valido para segundo movimiento 
     def getMoves(self, r, c, moves, turn):
 
         if self.turnB:
@@ -82,6 +84,7 @@ class GameState():
             print('segundo movimiento P2')
             self.turn(r, c, moves)
 
+    # cantidad de movimientos de las columnas 
     def getMovementColum(self):
         cont = 0
         #rint(self.stackColum[0][1][0])
@@ -93,18 +96,20 @@ class GameState():
         return cont-1
 
     def turn(self, r, c, moves):
-        print('-----')
-        print(r)
-        print(c)
-        print('-----')
+        print("lugar de entrada turno")
+        print(r,c)
         if ( not self.stackR==0 or not self.stackB ==0 ):
             jumps = self.getMovementColum()
         if self.whiteToMove:
-            if (self.stackB==0):
-                if self.board[r][c+1] == "--":
-                    moves.append(Move((r, c), (r, c+1), self.board))
-                if self.board[r-1][c+1] == "--":
-                    moves.append(Move((r, c), (r-1, c+1), self.board))
+            if self.stackB==0:
+                for i in range(len(self.board)):
+                    print("-value-"+str(i))
+                    print((r+i),(c+1))
+                    if self.board[i][c+1] == "--":
+                        moves.append(Move((r, c), (i, c+1), self.board))
+                    
+                    #if self.board[r-1][c+1] == "--":
+                    #    moves.append(Move((r, c), (r-1, c+1), self.board))
             else:
                 for i in range(jumps):
                     if c+(i+1) > 7:
@@ -115,6 +120,7 @@ class GameState():
                         if self.board[r-i-1][c-1] == "--":
                             moves.append(Move((r,c),(((r-i-1),c-1)),self.board))
         else:
+            print("entro")
             if (self.stackR==0):
                 if self.board[r][c-1] == "--":
                     moves.append(Move((r, c), (r, c-1), self.board))
@@ -128,19 +134,19 @@ class GameState():
                         if self.board[r][c-i] == "--":
                             moves.append(Move((r,c),(r,(c-i)),self.board))
                         ##if self.board[][]=="--"      
+        ## por que carajos tengo esta monda aca 
 
-
-
-        if self.whiteToMove:
-            if self.board[r][c+1] == "--":
-                moves.append(Move((r, c), (r, c+1), self.board))
-            if r == 7 and self.board[r-1][c+1] == "--":
-                moves.append(Move((r, c), (r-1, c+1), self.board))
-        else:
-            if self.board[r][c-1] == "--":
-                moves.append(Move((r, c), (r, c-1), self.board))
-            if r == 0 and self.board[r+1][c] == "--":
-                moves.append(Move((r, c), (r+1, c), self.board))
+        ##if self.whiteToMove:
+        ##    print("entra")
+        ##    if self.board[r][c+1] == "--":
+        ##        moves.append(Move((r, c), (r, c+1), self.board))
+        ##    if r == 7 and self.board[r-1][c+1] == "--":
+        ##        moves.append(Move((r, c), (r-1, c+1), self.board))
+        ##else:
+        ##    if self.board[r][c-1] == "--":
+        ##        moves.append(Move((r, c), (r, c-1), self.board))
+        ##    if r == 0 and self.board[r+1][c] == "--":
+        ##        moves.append(Move((r, c), (r+1, c), self.board))
 
 class Move():
 

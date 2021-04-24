@@ -1,8 +1,10 @@
 import LinjaBoard
+# B= Rojos
+# R= negros
 
 class GameState():
     def __init__(self):
-        self.board = LinjaBoard.board_m1r
+        self.board = LinjaBoard.board_m1b
         self.whiteToMove = True
         self.moveLog = []
         self.stackB = 0
@@ -10,7 +12,8 @@ class GameState():
         self.turnB = True
         self.turnR = True
         self.stackColum = []
-
+        self.extraB = False
+        self.extraR = False
 
     #recibe el movimiento de inicio y final de columna 
     def makeMove(self, move):
@@ -24,15 +27,19 @@ class GameState():
                 self.stackColum.pop(0)
 
         if((self.stackB == 1) or (self.stackR == 1)):
+            print("--1--")
             self.whiteToMove = not self.whiteToMove
             self.stackB = 0
             self.stackR = 0
         elif (self.whiteToMove):
+            print("--2--")
             if (len(self.stackColum)>0):
                 self.stackColum.clear()
             self.stackB += 1
+            print("ye tenemos cambio en el valor del primer cambio "+str(self.stackB))
             self.stackColum.append(([move.endRow], [move.endCol]))
         else:
+            print("--3--")
             if (len(self.stackColum)>0):
                 self.stackColum.clear()
             self.stackR += 1
@@ -96,57 +103,49 @@ class GameState():
         return cont-1
 
     def turn(self, r, c, moves):
-        print("lugar de entrada turno")
-        print(r,c)
+
+        if self.extraB:
+            # movimiento extra para fichas rojas revisar puesta en escena para verificar posicion en la que se va a colocar 
+            for i in range(len(self.board)):
+                if self.board[i][c+1] == "--":
+                    moves.append(Move((r,c),(i,c+1),self.board))
+            self.extraB = False
         if ( not self.stackR==0 or not self.stackB ==0 ):
             jumps = self.getMovementColum()
         if self.whiteToMove:
             if self.stackB==0:
                 for i in range(len(self.board)):
-                    print("-value-"+str(i))
-                    print((r+i),(c+1))
                     if self.board[i][c+1] == "--":
                         moves.append(Move((r, c), (i, c+1), self.board))
-                    
-                    #if self.board[r-1][c+1] == "--":
-                    #    moves.append(Move((r, c), (r-1, c+1), self.board))
             else:
+                #m2r
                 for i in range(jumps):
                     if c+(i+1) > 7:
                         break
                     else:
-                        if self.board[r][c+(i+1)] == "--":
-                            moves.append(Move((r, c), (r, (c+i+1)), self.board))
-                        if self.board[r-i-1][c-1] == "--":
-                            moves.append(Move((r,c),(((r-i-1),c-1)),self.board))
+                        for j in range(len(self.board)):                     
+                            if self.board[j][c+(i+1)] == "--":
+                                moves.append(Move((r, c), (j, (c+i+1)), self.board))
         else:
-            print("entro")
+            print("entro segunda parte")
+            # movimiento extra para fichas negras revisar puesta en escena para verificar posicion en la que se va a colocar 
+            if self.extraR:
+                for i in range(len(self.board)):
+                    if self.board[i][c-1] == "--":
+                        moves.append(Move((r,c),(i,c-1),self.board))
+                self.extraR = False
             if (self.stackR==0):
-                if self.board[r][c-1] == "--":
-                    moves.append(Move((r, c), (r, c-1), self.board))
-                if r == 0 and self.board[r+1][c] == "--":
-                    moves.append(Move((r, c), (r+1, c), self.board))
+                for i in range(len(self.board)):                
+                    if self.board[i][c-1] == "--":
+                        moves.append(Move((r, c), (i, c-1), self.board))
             else:
                 for i in range(jumps,0,-1):
-                    if c-r<0:
-                        break
-                    else:
-                        if self.board[r][c-i] == "--":
-                            moves.append(Move((r,c),(r,(c-i)),self.board))
-                        ##if self.board[][]=="--"      
-        ## por que carajos tengo esta monda aca 
-
-        ##if self.whiteToMove:
-        ##    print("entra")
-        ##    if self.board[r][c+1] == "--":
-        ##        moves.append(Move((r, c), (r, c+1), self.board))
-        ##    if r == 7 and self.board[r-1][c+1] == "--":
-        ##        moves.append(Move((r, c), (r-1, c+1), self.board))
-        ##else:
-        ##    if self.board[r][c-1] == "--":
-        ##        moves.append(Move((r, c), (r, c-1), self.board))
-        ##    if r == 0 and self.board[r+1][c] == "--":
-        ##        moves.append(Move((r, c), (r+1, c), self.board))
+                    for j in range(len(self.board)):
+                        if c-j<0:
+                            break
+                        else:
+                            if self.board[j][c-i] == "--":
+                                moves.append(Move((r,c),(j,(c-i)),self.board)) 
 
 class Move():
 

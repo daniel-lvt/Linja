@@ -5,7 +5,7 @@ import LinjaBoard
 
 class GameState():
     def __init__(self):
-        self.board = LinjaBoard.board_meb
+        self.board = LinjaBoard.board_principal
         self.whiteToMove = True
         self.moveLog = []
         self.stackB = 0
@@ -22,16 +22,11 @@ class GameState():
         self.board[move.startRow][move.startCol] = "--"
         self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)
+
         if self.stackB == 1 or self.stackR == 1:
             if len(self.stackColum) > 0:
                 self.stackColum.pop(0)
             self.stackColum.append(([move.endRow], [move.endCol]))
-            print("-------------")
-            print("conf: "+str(self.conf))
-            print("extrab: "+str(not self.extraB))
-            print("whiteToMove: "+str(self.whiteToMove))
-            print("stackColum: "+str(self.stackColum))
-            print("-------------")
             if (self.conf and not self.extraB and self.whiteToMove and (self.stackColum[0][1][0] == 7)) or (self.conf and (self.stackColum[0][1][0] == 0 and not self.whiteToMove and not self.extraR)):
                 self.conf = False
                 if not self.extraB:
@@ -42,12 +37,8 @@ class GameState():
                 print('-----------------')
                 print('cambio de jugador')
                 print('---------------')
-                self.whiteToMove = not self.whiteToMove
-                self.stackB = 0
-                self.stackR = 0
-                self.conf = True
-                self.extraB = False
-                self.extraR = False
+                self.reset_turn()
+
         elif (self.whiteToMove):
             print("--2--")
             if (len(self.stackColum) > 0):
@@ -61,6 +52,14 @@ class GameState():
                 self.stackColum.clear()
             self.stackR += 1
             self.stackColum.append(([move.endRow], [move.endCol]))
+
+    def reset_turn(self):
+        self.whiteToMove = not self.whiteToMove
+        self.stackB = 0
+        self.stackR = 0
+        self.conf = True
+        self.extraB = False
+        self.extraR = False
 
     # deshase el movimiento
     def undoMove(self):
@@ -96,23 +95,21 @@ class GameState():
     def getMoves(self, r, c, moves, turn):
 
         if self.turnB:
-            print('primer movimiento P1')
+            print('movimiento P1')
             self.turn(r, c, moves)
         elif not self.turnB and self.whiteToMove:
-            print('segundo movimiento P1')
+            print('movimiento P1')
             self.turn(r, c, moves)
         elif self.turnR and not self.turnB:
-            print('primer movimiento P2')
+            print(' movimiento P2')
             self.turn(r, c, moves)
         else:
-            print('segundo movimiento P2')
+            print('movimiento P2')
             self.turn(r, c, moves)
 
     # cantidad de movimientos de las columnas
     def getMovementColum(self):
         cont = 0
-        # rint(self.stackColum[0][1][0])
-        # print(self.stackColum)
         valCol = self.stackColum[0][1][0]
         for r in range(len(self.board)):
             if self.board[r][valCol] != "--":
@@ -123,26 +120,13 @@ class GameState():
 
         if (not self.stackR == 0 or not self.stackB == 0):
             jumps = self.getMovementColum()
+            self.reset_turn() if jumps == 0 else False
         if self.extraB:
-            # movimiento extra para fichas rojas revisar puesta en escena para verificar posicion en la que se va a colocar
-            print("tenemos movimiento extra")
-            for i in range(len(self.board)):
-                if c+(i+1) > 7:
-                    break
-                else:
-                    if self.board[i][c+1] == "--":
-                        moves.append(Move((r, c), (i, c+1), self.board))
+            self.turn_r('B', r, c, moves)
         elif self.whiteToMove:
             if self.stackB == 0:
-                for i in range(len(self.board)):
-                    if c+(i+1) > 7:
-                        break
-                    else:
-                        if self.board[i][c+1] == "--":
-                            moves.append(Move((r, c), (i, c+1), self.board))
+                self.turn_r('B', r, c, moves)
             else:
-                print('entra al salto')
-                # m2r
                 for i in range(jumps):
                     if c+(i+1) > 7:
                         break
@@ -152,22 +136,11 @@ class GameState():
                                 moves.append(
                                     Move((r, c), (j, (c+i+1)), self.board))
         else:
-            print("entro segunda parte")
             # movimiento extra para fichas negras revisar puesta en escena para verificar posicion en la que se va a colocar
             if self.extraR:
-                for i in range(len(self.board)):
-                    if c-(i-1) <0:
-                        break
-                    else:
-                        if self.board[i][c-1] == "--":
-                            moves.append(Move((r, c), (i, c-1), self.board))
-            if (self.stackR == 0):
-                for i in range(len(self.board)):
-                    if c-(i-1) <0:
-                        break
-                    else:
-                        if self.board[i][c-1] == "--":
-                            moves.append(Move((r, c), (i, c-1), self.board))
+                self.turn_r('R', r, c, moves)
+            elif self.stackR == 0:
+                self.turn_r('R', r, c, moves)
             else:
                 for i in range(jumps, 0, -1):
                     for j in range(len(self.board)):
@@ -177,6 +150,24 @@ class GameState():
                             if self.board[j][c-i] == "--":
                                 moves.append(
                                     Move((r, c), (j, (c-i)), self.board))
+
+    def turn_r(self, type, r, c, moves):
+        if type == 'B':
+            for i in range(len(self.board)):
+                if c+1 > 7:
+                    break
+                else:
+                    if self.board[i][c+1] == "--":
+                        moves.append(Move((r, c), (i, c+1), self.board))
+        elif type == 'R':
+            for i in range(len(self.board)):
+                if c-1 < 0:
+                    break
+                else:
+                    if self.board[i][c-1] == "--":
+                        moves.append(Move((r, c), (i, c-1), self.board))
+        else:
+            print('---ERROR EN LA MATRIX---')
 
 
 class Move():

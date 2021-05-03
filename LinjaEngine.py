@@ -16,6 +16,7 @@ class GameState():
         self.extraB = False
         self.extraR = False
         self.conf = True
+        self.GameOver=False
 
     # recibe el movimiento de inicio y final de columna
     def makeMove(self, move):

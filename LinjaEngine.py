@@ -91,7 +91,6 @@ class GameState():
         return moves
 
     # definicion de turno
-    # ---- cudrar movimiento extra solo valido para segundo movimiento
 
     def getMoves(self, r, c, moves, turn):
 
@@ -118,7 +117,8 @@ class GameState():
         return cont-1
 
     def turn(self, r, c, moves):
-
+        print(self.board[r][c])
+        print(r,c)
         if (not self.stackR == 0 or not self.stackB == 0):
             jumps = self.getMovementColum()
             self.reset_turn() if jumps == 0 else False
@@ -151,6 +151,7 @@ class GameState():
                             if self.board[j][c-i] == "--":
                                 moves.append(
                                     Move((r, c), (j, (c-i)), self.board))
+        
 
     def turn_r(self, type, r, c, moves):
         if type == 'B':
@@ -169,6 +170,11 @@ class GameState():
                         moves.append(Move((r, c), (i, c-1), self.board))
         else:
             print('---ERROR EN LA MATRIX---')
+
+    ##fijar final de juego 
+    def endGame(self,r,c):
+        print(r,c)
+        print(self.board[r][c])
 
 
 class Move():

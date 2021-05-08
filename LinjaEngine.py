@@ -2,7 +2,6 @@ import LinjaBoard
 # B= Rojos
 # R= negros
 
-
 class GameState():
     def __init__(self):
         self.board = LinjaBoard.board_principal
@@ -45,7 +44,6 @@ class GameState():
             if (len(self.stackColum) > 0):
                 self.stackColum.clear()
             self.stackB += 1
-            #print("ye tenemos cambio en el valor del primer cambio "+str(self.stackB))
             self.stackColum.append(([move.endRow], [move.endCol]))
         else:
             print("--3--")

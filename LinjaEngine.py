@@ -4,7 +4,7 @@ import LinjaBoard
 
 class GameState():
     def __init__(self):
-        self.board = LinjaBoard.board_principal
+        self.board = LinjaBoard.board_EndB
         self.whiteToMove = True
         self.moveLog = []
         self.stackB = 0
@@ -23,7 +23,10 @@ class GameState():
         self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)
 
-        if self.stackB == 1 or self.stackR == 1:
+        if self.endGame():
+            self.score()
+            self.GameOver=True
+        elif self.stackB == 1 or self.stackR == 1:
             if len(self.stackColum) > 0:
                 self.stackColum.pop(0)
             self.stackColum.append(([move.endRow], [move.endCol]))
@@ -62,7 +65,8 @@ class GameState():
 
     # deshase el movimiento
     def undoMove(self):
-        if len(self.moveLog) != 0:
+        
+        if len(self.moveLog) != 0 :
             move = self.moveLog.pop()
             self.board[move.startRow][move.startCol] = move.pieceMoved
             self.board[move.endRow][move.endCol] = move.pieceCaptured
@@ -91,18 +95,17 @@ class GameState():
     # definicion de turno
 
     def getMoves(self, r, c, moves, turn):
-
         if self.turnB:
-            print('movimiento P1')
+            print('1 movimiento P1')
             self.turn(r, c, moves)
         elif not self.turnB and self.whiteToMove:
-            print('movimiento P1')
+            print('2 movimiento P1')
             self.turn(r, c, moves)
         elif self.turnR and not self.turnB:
-            print(' movimiento P2')
+            print('1 movimiento P2')
             self.turn(r, c, moves)
         else:
-            print('movimiento P2')
+            print('2 movimiento P2')
             self.turn(r, c, moves)
 
     # cantidad de movimientos de las columnas
@@ -115,8 +118,7 @@ class GameState():
         return cont-1
 
     def turn(self, r, c, moves):
-        print(self.board[r][c])
-        print(r,c)
+
         if (not self.stackR == 0 or not self.stackB == 0):
             jumps = self.getMovementColum()
             self.reset_turn() if jumps == 0 else False
@@ -170,10 +172,76 @@ class GameState():
             print('---ERROR EN LA MATRIX---')
 
     ##fijar final de juego 
-    def endGame(self,r,c):
-        print(r,c)
-        print(self.board[r][c])
+    def endGame(self):
+        cont=0
+        state=False
+        for r in range(len(self.board)):
+            for c in range(len(self.board[r])):
+                turn = self.board[r][c][0]
+                if(turn == 'r' and self.whiteToMove):
+                    if c<4:
+                        cont+=1
+                elif (turn == 'b' and not self.whiteToMove):
+                    if c>3:
+                        cont+=1
+        return state if cont>0 else True
 
+    def score(self):
+
+        scoreBlack={'b1':0,'b2':0,'b3':0,'b4':0}
+        scoreRed={'r1':0,'r2':0,'r3':0,'r4':0}
+
+        for r in range(len(self.board)):
+            for c in range(len(self.board[r])):
+                turn = self.board[r][c][0]
+                if turn=='b' and c==0:
+                    scoreBlack['b4']+=5
+                elif turn=='b' and c==1:
+                    scoreBlack['b3']+=3
+                elif turn=='b' and c==2:
+                    scoreBlack['b2']+=2
+                elif turn=='b' and c==3:
+                    scoreBlack['b1']+=1
+                elif turn=='r' and c==4:
+                    scoreRed['r1']+=1
+                elif turn=='r' and c==5:
+                    scoreRed['r2']+=2                                      
+                elif turn=='r' and c==6:
+                    scoreRed['r3']+=3
+                elif turn=='r' and c==7:
+                    scoreRed['r4']+=5
+        
+        out=self.strScore(scoreRed,scoreBlack)
+
+        return out  
+    
+    def strScore(self,r,b):
+        total=0
+        index=1
+        text="Red :"
+        for i in r:
+            valor=r[i]
+            text+="[("+str(index)+"):"+str(valor)+"]"
+            total+=valor
+            if index==3:
+                index+=2
+            else:
+                index+=1
+        text+=" Total: "+str(total)+"\n"
+        total=0
+        index=1
+        text+="Black :"
+        for i in b:
+            valor=b[i]
+            text+="[("+str(index)+"): "+str(valor)+"]"
+            total+=valor
+            if index==3:
+                index+=2
+            else:
+                index+=1
+        text+=" Total: "+str(total)+" \n"
+        return text
+                                 
 
 class Move():
 

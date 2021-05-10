@@ -68,7 +68,9 @@ def mainGame(pyOne,pyTwo):
                     moveMade = True  
         #IA
         if not gameOver and not humanTurn:
-            IAMove=MoveFinder.findRandomMove(validMoves)
+            IAMove=MoveFinder.findBestMove(gs,validMoves)
+            if IAMove is None:
+                IAMove=MoveFinder.findRandomMove(validMoves)
             gs.makeMove(IAMove)
             moveMade=True
         
@@ -80,10 +82,11 @@ def mainGame(pyOne,pyTwo):
 
         if gs.GameOver:
             gameOver=True
+            infoScore=gs.score().split('\n')
             if gs.whiteToMove:
-                drawText(screen,"Reds win the game")
+                drawText(screen,"Reds finish the game",infoScore[0],infoScore[1])
             else:
-                drawText(screen,"Blacks win the game")
+                drawText(screen,"Blacks finish the game",infoScore[0],infoScore[1])
     
         clock.tick(MAX_FPS)
         p.display.flip()
@@ -125,12 +128,29 @@ def drawPieces(screen, board):
                 screen.blit(IMAGES[piece], p.Rect(
                     c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
-def drawText(screen,text):
-    font=p.font.SysFont("Helvitca",32,True,False)
-    textObject=font.render(text,0,p.Color('Gray'))
+def drawText(screen,text,scorer,scoreb):
+    font=p.font.SysFont("Helvitca",40,True,False)
+    fontScorer=p.font.SysFont("Helvitca",28,True,False)
+    fontScoreb=p.font.SysFont("Helvitca",28,True,False)
+
+    textObject=font.render(text,0,p.Color("Gray"))
+    textObjectScorer=fontScorer.render(scorer,0,p.Color('white'))
+    textObjectScoreb=fontScoreb.render(scoreb,0,p.Color("Gray"))
+    
     textLocation= p.Rect(0,0,WIDTH,HEIGHT).move(WIDTH/2-textObject.get_width()/2,HEIGHT/2-textObject.get_height()/2)
+    textLocationScorer=p.Rect(0,0,WIDTH,HEIGHT).move(WIDTH/2-textObjectScorer.get_width()/2,HEIGHT/1.5-textObjectScorer.get_height()/8)
+    textLocationScoreb=p.Rect(0,0,WIDTH,HEIGHT).move(WIDTH/2-textObjectScoreb.get_width()/2,HEIGHT/1.3-textObjectScoreb.get_height()/8)
+    
     screen.blit(textObject,textLocation)
-    textObject=font.render(text,0,p.Color("Black")) 
+    screen.blit(textObjectScorer,textLocationScorer)
+    screen.blit(textObjectScoreb,textLocationScoreb)
+    
+    textObject=font.render(text,0,p.Color("black"))
+    textObjectScorer=fontScorer.render(scorer,0,p.Color("Red")) 
+    textObjectScoreb=fontScoreb.render(scoreb,0,p.Color("Black"))
+    
     screen.blit(textObject,textLocation.move(2,2))
+    screen.blit(textObjectScorer,textLocationScorer.move(1,2.5))
+    screen.blit(textObjectScoreb,textLocationScoreb.move(1,2.5))
 
 

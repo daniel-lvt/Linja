@@ -9,18 +9,26 @@ def findRandomMove(validMoves):
 
 def findBestMove(gs, validMoves):
     turnMultiplier = 1 if gs.whiteToMove else -1
-    maxScore = -END
-    bestMove=None
+    opponentMinMaxScore = END
+    bestMove = None
     for playerMove in validMoves:
         gs.makeMove(playerMove)
-        if gs.GameOver:
-            score = END
-        else:
-            score = turnMultiplier*scoreM(gs.board)
-        if score < maxScore:
-            maxScore = score
+        opponentsMoves = gs.getValidMoves()
+        opponentMaxScore = -END
+        for opponentsMove in opponentsMoves:
+            gs.makeMove(opponentsMove)
+            if gs.GameOver:
+                score = -turnMultiplier*END
+            else:
+                score = -turnMultiplier*scoreM(gs.board)
+            if score > opponentMaxScore:
+                opponentMaxScore = score
+            gs.undoMove()
+        if opponentMaxScore < opponentMinMaxScore:
+            opponentMinMaxScore = opponentMaxScore
             bestMove = playerMove
         gs.undoMove()
+
     return bestMove
 
 

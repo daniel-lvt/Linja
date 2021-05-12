@@ -32,7 +32,7 @@ class GameState():
             self.stackColum.append(([move.endRow], [move.endCol]))
             if (self.conf and not self.extraB and self.whiteToMove and (self.stackColum[0][1][0] == 7)) or (self.conf and (self.stackColum[0][1][0] == 0 and not self.whiteToMove and not self.extraR)):
                 self.conf = False
-                if not self.extraB:
+                if not self.extraB and self.whiteToMove:
                     self.extraB = True
                 elif not self.extraR:
                     self.extraR = True
@@ -70,7 +70,8 @@ class GameState():
             move = self.moveLog.pop()
             self.board[move.startRow][move.startCol] = move.pieceMoved
             self.board[move.endRow][move.endCol] = move.pieceCaptured
-            self.whiteToMove = not self.whiteToMove
+            #revisar en que csos estalla
+            #self.whiteToMove = not self.whiteToMove
 
     # retorna todos los movimientos validos
     def getValidMoves(self):
@@ -96,16 +97,12 @@ class GameState():
 
     def getMoves(self, r, c, moves, turn):
         if self.turnB:
-            print('1 movimiento P1')
             self.turn(r, c, moves)
         elif not self.turnB and self.whiteToMove:
-            print('2 movimiento P1')
             self.turn(r, c, moves)
         elif self.turnR and not self.turnB:
-            print('1 movimiento P2')
             self.turn(r, c, moves)
         else:
-            print('2 movimiento P2')
             self.turn(r, c, moves)
 
     # cantidad de movimientos de las columnas
@@ -138,20 +135,19 @@ class GameState():
                                     Move((r, c), (j, (c+i+1)), self.board))
         else:
             # movimiento extra para fichas negras revisar puesta en escena para verificar posicion en la que se va a colocar
-            if self.extraR:
+            if self.extraR and not self.whiteToMove:
                 self.turn_r('R', r, c, moves)
             elif self.stackR == 0:
                 self.turn_r('R', r, c, moves)
             else:
-                for i in range(jumps, 0, -1):
-                    for j in range(len(self.board)):
-                        if c-j < 0:
-                            break
-                        else:
-                            if self.board[j][c-i] == "--":
-                                moves.append(
-                                    Move((r, c), (j, (c-i)), self.board))
-        
+                for i in range(jumps,0,-1):
+                    if c-1<0 and c-i<0:
+                        break
+                    else:
+                        for j in range(len(self.board)):
+                            if self.board[j][c-i]=="--":
+                                moves.append(Move((r,c),(j,(c-i)),self.board))
+
 
     def turn_r(self, type, r, c, moves):
         if type == 'B':

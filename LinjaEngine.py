@@ -1,10 +1,11 @@
 import LinjaBoard
+import MoveFinder
 # B= Rojos
 # R= negros
 
 class GameState():
     def __init__(self):
-        self.board = LinjaBoard.board_EndB
+        self.board = LinjaBoard.board_principal
         self.whiteToMove = True
         self.moveLog = []
         self.stackB = 0
@@ -23,6 +24,8 @@ class GameState():
         self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)
 
+        #MoveFinder.scoreM(self.board)
+
         if self.endGame():
             self.score()
             self.GameOver=True
@@ -37,19 +40,17 @@ class GameState():
                 elif not self.extraR:
                     self.extraR = True
             else:
-                print('-----------------')
-                print('cambio de jugador')
-                print('---------------')
+                #print('-----------------')
+                #print('cambio de jugador')
+                #print('---------------')
                 self.reset_turn()
 
         elif (self.whiteToMove):
-            print("--2--")
             if (len(self.stackColum) > 0):
                 self.stackColum.clear()
             self.stackB += 1
             self.stackColum.append(([move.endRow], [move.endCol]))
         else:
-            print("--3--")
             if (len(self.stackColum) > 0):
                 self.stackColum.clear()
             self.stackR += 1
@@ -65,13 +66,48 @@ class GameState():
 
     # deshase el movimiento
     def undoMove(self):
-        
+        ## arreglar
+        if not self.whiteToMove:
+            self.whiteToMove=not self.whiteToMove
         if len(self.moveLog) != 0 :
+
             move = self.moveLog.pop()
             self.board[move.startRow][move.startCol] = move.pieceMoved
+            #print(self.board[move.startRow][move.startCol])
             self.board[move.endRow][move.endCol] = move.pieceCaptured
+            if self.board[move.startRow][move.startCol]=='r':
+                self.whiteToMove=True
+            elif self.board[move.startRow][move.startCol]=='b':
+                self.whiteToMove=False
+            if len(self.stackColum)>0:
+                self.stackColum.pop(0)
+            if self.whiteToMove:
+                if self.stackB>=0:
+                    self.extraB=False if self.extraB==True else False
+                    self.turnB=True
+                    if self.stackB!=0:
+                        self.stackB-=1
+
+                self.conf=True
+            else:
+                if self.stackR>=0:
+                    self.extraR=False if self.extraR==True else False
+                    self.turnR=True
+                    if self.stackR!=0:
+                        self.stackR-=0
+
+                self.conf=True
+            self.conf=True#print('*********')
+            #print(self.stackColum)
+            #print(self.stackB)
+            #print(self.stackR)
+            #print(self.conf)
+            #print(self.whiteToMove)
+            #print('*********')
+            #revisar falta probarlo mas
             #revisar en que csos estalla
-            #self.whiteToMove = not self.whiteToMove
+            #if (self.whiteToMove and self.stackB>0) or (self.stackR>0 and not self.whiteToMove):
+            #    self.whiteToMove = not self.whiteToMove
 
     # retorna todos los movimientos validos
     def getValidMoves(self):
@@ -97,29 +133,36 @@ class GameState():
 
     def getMoves(self, r, c, moves, turn):
         if self.turnB:
+            #print('1')
             self.turn(r, c, moves)
         elif not self.turnB and self.whiteToMove:
+            #print('2')
             self.turn(r, c, moves)
         elif self.turnR and not self.turnB:
+            #print('3')
             self.turn(r, c, moves)
         else:
+            #print('4')
             self.turn(r, c, moves)
 
     # cantidad de movimientos de las columnas
     def getMovementColum(self):
         cont = 0
-        valCol = self.stackColum[0][1][0]
-        for r in range(len(self.board)):
-            if self.board[r][valCol] != "--":
-                cont += 1
-        return cont-1
+        if len(self.stackColum)>0:
+            valCol = self.stackColum[0][1][0]
+            for r in range(len(self.board)):
+                if self.board[r][valCol] != "--":
+                    cont += 1
+            return cont-1
+        return 1
 
     def turn(self, r, c, moves):
-
+        
         if (not self.stackR == 0 or not self.stackB == 0):
             jumps = self.getMovementColum()
             self.reset_turn() if jumps == 0 else False
         if self.extraB:
+            #print('entrada extra en rojas')
             self.turn_r('B', r, c, moves)
         elif self.whiteToMove:
             if self.stackB == 0:
@@ -136,6 +179,7 @@ class GameState():
         else:
             # movimiento extra para fichas negras revisar puesta en escena para verificar posicion en la que se va a colocar
             if self.extraR and not self.whiteToMove:
+                #print('entrada etra en negras')
                 self.turn_r('R', r, c, moves)
             elif self.stackR == 0:
                 self.turn_r('R', r, c, moves)
@@ -208,7 +252,6 @@ class GameState():
                     scoreRed['r4']+=5
         
         out=self.strScore(scoreRed,scoreBlack)
-
         return out  
     
     def strScore(self,r,b):

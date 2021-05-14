@@ -63,12 +63,14 @@ def mainGame(pyOne,pyTwo):
                         sqSelected = ()
                         playerClicks = []
             elif e.type == p.KEYDOWN:
-                if e.key == p.K_x:
+                if e.key == p.K_a:
                     gs.undoMove()
                     moveMade = True  
         #IA
         if not gameOver and not humanTurn:
-            IAMove=MoveFinder.findBestMove(gs,validMoves)
+            IAMove=MoveFinder.findRandomMove(validMoves)
+
+            #IAMove=MoveFinder.findBestMove(gs,validMoves)
             if IAMove is None:
                 IAMove=MoveFinder.findRandomMove(validMoves)
             gs.makeMove(IAMove)

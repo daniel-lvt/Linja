@@ -35,7 +35,7 @@ class GUI:
         self.etkSel = ttk.Label(self.root, text="Select Game Mode")
 
         values = ['1-Human', '2-Machine']
-        self.cmbOne = ttk.Combobox(self.root, state="readonlye", values=values)
+        self.cmbOne = ttk.Combobox(self.root, state="readonlye", values=['1-Human'])
         self.cmbTwo = ttk.Combobox(self.root, state="readonlye", values=values)
 
         self.cmbOne.current(0)
@@ -57,7 +57,7 @@ class GUI:
         LinjaBoardGame.mainGame(playerOne, playerTwo)
 
     def information(self):
-        webbrowser.open("www.google.com")
+        webbrowser.open("http://localhost:3000")
 
     def locationElements(self):
         self.frameOne.place(x=198, y=0, width=200, height=198)
